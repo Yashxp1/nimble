@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-type Handler<T> = (req: NextRequest, ctx?: any) => Promise<T>;
+type Handler<T> = (req: NextRequest, ctx?: undefined) => Promise<T>;
 
 export function withApiHandler<T>(handler: Handler<T>) {
-  return async (req: NextRequest, ctx?: any) => {
+  return async (req: NextRequest, ctx?: undefined) => {
     try {
       const result = await handler(req, ctx);
 
-      if (result instanceof NextResponse) return result;
-
-      return NextResponse.json({ success: true, data: result });
-      
+      return NextResponse.json(
+        { success: true, data: result },
+        { status: 200 }
+      );
     } catch (error) {
       console.error('API Error:', error);
       return NextResponse.json(

@@ -1,37 +1,28 @@
 import { auth } from '@/auth';
+import { withApiHandler } from '@/lib/apiHandler';
+import { IGithubUser } from '@/types/api';
+import { NextRequest } from 'next/server';
+import axios from 'axios';
 
-import { NextRequest, NextResponse } from 'next/server';
+const getGithubProfile = async (req: NextRequest): Promise<IGithubUser> => {
 
-export async function POST(req: NextRequest) {
-  try {
-    const session = await auth();
+  const session = await auth();
 
-    if (!session?.user?.id || !session) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { username } = await req.json();
-
-    const res = fetch(`https://api.github.com/users/${username}`, {
-      headers: {
-        Accept: 'application/vnd.github+json',
-      },
-    });
-
-    if (!(await res).ok) {
-      return NextResponse.json(
-        { message: 'User not found' },
-        { status: (await res).status }
-      );
-    }
-
-    const data = await (await res).json();
-
-    // console.log(data)
-
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error('Server Error', error);
-    return NextResponse.json({ message: 'Server Error' }, { status: 500 });
+  if (!session?.user?.id) {
+    throw new Error('Unauthorized');
   }
-}
+
+  const { username } = await req.json();
+
+  if (!username) {
+    throw new Error('Username is required');
+  }
+
+  const { data } = await axios.get<IGithubUser>(
+    ` https://api.github.com/users/${username}`
+  );
+
+  return data;
+};
+
+export const POST = withApiHandler(getGithubProfile);
