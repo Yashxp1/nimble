@@ -1,12 +1,10 @@
-import Google from '@/components/auth/google';
-import { ModeToggle } from '@/components/theme/ModeToggle';
+import LandingPage from '@/components/Landing/LandingPage';
 import React from 'react';
 
 const page = () => {
   return (
-    <div>
-      <ModeToggle />
-      <Google/>
+    <div className=" min-h-screen">
+      <LandingPage />
     </div>
   );
 };
